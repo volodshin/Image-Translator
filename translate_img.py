@@ -1,25 +1,30 @@
 import requests
 from PIL import Image
 import pytesseract
-img_file = 'photo_2.jpg'
+img_file = 'photo_1.jpg'
 
 img = Image.open(img_file)
 
-custom_config = r'-l ukr+eng'
-result = pytesseract.image_to_string(img, config=custom_config)
+result = pytesseract.image_to_string(img, lang='ukr+eng')
 
-url = "https://long-translator.p.rapidapi.com/translate"
 
-payload = "source_language=auto&target_language=us&text={}".format(result)
+url = "https://translate-plus.p.rapidapi.com/translate"
+
+payload = {
+	"text": f"{result}",
+	"source": "uk",
+	"target": "en"
+}
 headers = {
-	"content-type": "application/x-www-form-urlencoded",
-	"X-RapidAPI-Key": "ff2c859cf0msh6ab4cd32f934a2dp1a52a8jsn039fdc4a2f6a",
-	"X-RapidAPI-Host": "long-translator.p.rapidapi.com"
+	"content-type": "application/json",
+	"X-RapidAPI-Key": "02fbd95b13msha8c91940307c8fap10f6d0jsnb7cc0aad5df9",
+	"X-RapidAPI-Host": "translate-plus.p.rapidapi.com"
 }
 
-response = requests.request("POST", url, data=payload.encode('utf-8'), headers=headers)
+response = requests.request("POST", url, json=payload, headers=headers)
 data = response.json()
 
-translation = data["translatedText"]
+text = data['translations']['translation']
 
-print(translation)
+
+print(text)
