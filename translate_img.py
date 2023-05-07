@@ -1,30 +1,72 @@
+from config import headers, url
 import requests
 from PIL import Image
 import pytesseract
-img_file = 'photo_1.jpg'
-
-img = Image.open(img_file)
-
-result = pytesseract.image_to_string(img, lang='ukr+eng')
+import PySimpleGUI as sg
+import io, os
 
 
-url = "https://translate-plus.p.rapidapi.com/translate"
+#
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-payload = {
+sg.theme('dark grey 9')
+
+file_types = [("JPEG (*.jpg)", "*.jpg"),
+              ("All files (*.*)", "*.*")]
+
+layout = [
+	[sg.Image(key="-IMAGE-")],
+	[sg.Text("Choose your image")],
+    [sg.Input(key='-file-'), sg.FileBrowse(file_types=file_types, key='-FILE_BROWSE-')],
+    [sg.OptionMenu(values=['en', 'uk', 'pl', 'fr', 'de'], default_value = 'en', key='-TEXT_LANG-'), sg.Push(),
+    sg.OptionMenu(values=['en', 'uk', 'pl', 'fr', 'de'], default_value = 'en', key='-TRANSLATE_LANG-')],
+    [sg.Multiline(size=(80, 15), key='-OUTPUT-')],
+    [sg.Button('Translate'), sg.Push(), sg.Button('Quit')]]
+
+# Create the window
+window = sg.Window('Tanslate', layout, size=(600, 400))
+
+
+
+# Display and interact with the Window using an Event Loop
+while True:
+	event, values = window.read()
+	if event == sg.WINDOW_CLOSED or event == 'Quit':
+		break
+	if event =='-FILE_BROWSE-':
+		filename = values["-file-"]
+		if os.path.exists(filename):
+			image = Image.open(values["-file-"])
+			image.thumbnail((400, 400))
+			bio = io.BytesIO()
+
+			# Actually store the image in memory in binary 
+			image.save(bio, format="PNG")
+
+			# Use that image data in order to 
+			window["-IMAGE-"].update(data=bio.getvalue())
+		
+	img_path = values['-file-']
+	img_file = f'{img_path}'
+
+	img = Image.open(img_file)
+
+	text_lang = values['-TEXT_LANG-']
+	translate_lang = values['-TRANSLATE_LANG-']
+
+	result = pytesseract.image_to_string(img, lang=f'{text_lang}')
+	payload = {
 	"text": f"{result}",
-	"source": "uk",
-	"target": "en"
-}
-headers = {
-	"content-type": "application/json",
-	"X-RapidAPI-Key": "02fbd95b13msha8c91940307c8fap10f6d0jsnb7cc0aad5df9",
-	"X-RapidAPI-Host": "translate-plus.p.rapidapi.com"
-}
-
-response = requests.request("POST", url, json=payload, headers=headers)
-data = response.json()
-
-text = data['translations']['translation']
+	"source": f"{text_lang}",
+	"target": f"{translate_lang}"
+	}
 
 
-print(text)
+	response = requests.request("POST", url, json=payload, headers=headers)
+	data = response.json()
+
+	text = data['translations']['translation']
+	window['-OUTPUT-'].update(f'{text}')
+
+
+window.close()
