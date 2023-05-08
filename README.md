@@ -20,6 +20,7 @@
  and place in /Tesseract-OCR/tessdata
  
 **⛔Importantly⛔**
+
 Rename your all language file from ISO 639-2 to ISO 639-1 **(eng.traineddata to en.traineddata)**, because API does not accept ISO 639-2 languages code.
 
 Also you need add to the window interface new language. 
