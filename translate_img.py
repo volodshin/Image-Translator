@@ -20,11 +20,11 @@ layout = [
     [sg.Input(key='-file-'), sg.FileBrowse(file_types=file_types)],
     [sg.OptionMenu(values=['en', 'uk', 'pl', 'fr', 'de'], default_value = 'en', key='-TEXT_LANG-'), sg.Push(),
     sg.OptionMenu(values=['en', 'uk', 'pl', 'fr', 'de'], default_value = 'en', key='-TRANSLATE_LANG-')],
-    [sg.Multiline(size=(80, 15), key='-OUTPUT-')],
+    [sg.Multiline(size=(60, 15), key="-IMGTXT-"), sg.Multiline(size=(60, 15), key='-OUTPUT-')],
     [sg.Button('Translate'), sg.Push(), sg.Button('Quit')]]
 
 # Create the window
-window = sg.Window('Tanslate', layout, size=(600, 400))
+window = sg.Window('Tanslate', layout, size=(900, 400))
 
 
 
@@ -58,6 +58,7 @@ while True:
 	text = data['translations']['translation']
 
 	#Upload text on the screen
+	window['-IMGTXT-'].update(f'{result}')
 	window['-OUTPUT-'].update(f'{text}')
 
 
